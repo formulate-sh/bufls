@@ -1,8 +1,8 @@
 from typing import List, Optional
-from pygls.lsp.methods import FORMATTING, TEXT_DOCUMENT_DID_CHANGE, TEXT_DOCUMENT_DID_OPEN
+from pygls.lsp.methods import FORMATTING, TEXT_DOCUMENT_DID_CHANGE, TEXT_DOCUMENT_DID_OPEN, TEXT_DOCUMENT_DID_SAVE
 from pygls.lsp.types.basic_structures import Diagnostic
 from pygls.lsp.types.language_features.formatting import DocumentFormattingParams
-from pygls.lsp.types.workspace import DidChangeTextDocumentParams, DidOpenTextDocumentParams
+from pygls.lsp.types.workspace import DidChangeTextDocumentParams, DidOpenTextDocumentParams, DidSaveTextDocumentParams
 from pygls.server import LanguageServer
 from pygls.workspace import Document
 
@@ -26,6 +26,15 @@ def formatting(ls: BufLanguageServer, params: DocumentFormattingParams):
         content = document.source
         return ls.services.format_document(document.uri, content, params)
     return None
+
+
+@language_server.feature(TEXT_DOCUMENT_DID_SAVE)
+def did_save(ls: BufLanguageServer, params: DidSaveTextDocumentParams):
+    diagnostics: List[Diagnostic] = []
+    document = _get_valid_document(ls, params.text_document.uri)
+    if document:
+        diagnostics = ls.services.validate_document(document.uri)
+    ls.publish_diagnostics(params.text_document.uri, diagnostics=diagnostics)
 
 
 @language_server.feature(TEXT_DOCUMENT_DID_OPEN)

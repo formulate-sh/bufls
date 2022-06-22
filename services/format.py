@@ -23,7 +23,7 @@ class BufToolFormatService:
 
         lines = contents.count("\n")
         start = Position(line=0, character=0)
-        end = Position(line=lines + 2, character=0)
+        end = Position(line=lines + 1, character=0)
         return [TextEdit(range=Range(start=start, end=end), new_text=formatted_result)]
 
     def format_content(self, path: str, tabSize: int = 4) -> str:

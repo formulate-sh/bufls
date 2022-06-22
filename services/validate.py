@@ -6,7 +6,7 @@ from typing import List, Union
 from pygls.lsp.types.basic_structures import Diagnostic, Position, Range, TextEdit
 
 
-RE_VALIDATION = r'(\d+:\d+):\w+\s([a-zA-Z0-9\.]+):\s([a-zA-Z0-9\. ]+)'
+RE_VALIDATION = r'(\d+:\d+):\w+\s(.*):\s(.*)'
 
 class BufToolValidateService:
     """Buff tool format service.
@@ -32,10 +32,10 @@ class BufToolValidateService:
             if len(matches[0]) != 3:
                 continue
 
-            match = matches[0]
-            line = int(match[0].split(':')[0])
-            column = int(match[0].split(':')[1])
-            message = match[2]
+            found = matches[0]
+            line = int(found[0].split(':')[0])
+            column = int(found[0].split(':')[1])
+            message = found[2]
 
             result = Diagnostic(
                 range=Range(
@@ -57,7 +57,7 @@ class BufToolValidateService:
 
 
 def run_buf_validate(path: str) -> Union[str, None]:
-    result = subprocess.run(['buf', 'lint', path.lstrip('file:')], stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+    result = subprocess.run(['buf', 'lint', '--path', path.lstrip('file:')], stdout=subprocess.PIPE, stderr=subprocess.PIPE)
     if result.stderr:
         return None
     return result.stdout.decode("utf-8")
